@@ -24,6 +24,7 @@ class MainActivity : Activity() {
 
 		initApi()
 		initPostsList()
+		updateSelectedPostsCount()
 	}
 
 	override fun onStart() {
@@ -39,6 +40,10 @@ class MainActivity : Activity() {
 		postsAdapter = PostsAdapter()
 		main_posts_recycler.adapter = postsAdapter
 		main_posts_recycler.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+
+		postsAdapter.setOnItemSelectionChangedListener {
+			updateSelectedPostsCount()
+		}
 	}
 
 	private fun loadPosts() {
@@ -59,6 +64,17 @@ class MainActivity : Activity() {
 
 	private fun convertPost(post: Post): SelectableItem<Post> {
 	  return SelectableItem(post, false)
+	}
+
+	private fun updateSelectedPostsCount() {
+		/*
+		 * "4. The nav bar should display the number of the selected posts."
+		 * In Android a navigation bar contains the device navigation controls: Back, Home, and Overview buttons.
+		 * (see https://material.io/design/platform-guidance/android-bars.html#android-navigation-bar)
+		 * Taking into account that navigation bar cannot display numbers, I've assumed that "nav bar" in the assignment means the toolbar.
+		 */
+		val selectedCount = postsAdapter.getSelectedItemsCount()
+		main_toolbar.setTitle(selectedCount.toString())
 	}
 
 	companion object {

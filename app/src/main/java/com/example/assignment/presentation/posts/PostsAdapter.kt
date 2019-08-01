@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.post_item.view.*
 
 class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 	private val posts: MutableList<SelectableItem<Post>> = mutableListOf()
+	private var itemSelectionChangedListener: (() -> Unit)? = null
 
 	override fun getItemCount(): Int {
 		return posts.size
@@ -33,12 +34,28 @@ class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 		this.posts.clear()
 		this.posts.addAll(posts)
 		notifyDataSetChanged()
+		notifyItemSelectionChangeListener()
+	}
+
+	fun setOnItemSelectionChangedListener(listener: () -> Unit) {
+		this.itemSelectionChangedListener = listener
+	}
+
+	fun getSelectedItemsCount(): Int {
+		return posts.count { item ->
+			item.isSelected
+		}
 	}
 
 	private fun onItemSelectionChanged(position: Int, isChecked: Boolean) {
 		val post = posts[position]
 		post.isSelected = isChecked
 		notifyItemChanged(position)
+		notifyItemSelectionChangeListener()
+	}
+
+	private fun notifyItemSelectionChangeListener() {
+		itemSelectionChangedListener?.invoke()
 	}
 
 	inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -59,4 +76,3 @@ class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 		}
 	}
 }
-

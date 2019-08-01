@@ -11,7 +11,7 @@
 		android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round">
 
-		<activity android:name="com.example.assignment.presentation.MainActivity">
+		<activity android:name="com.example.assignment.presentation.posts.MainActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 				<category android:name="android.intent.category.LAUNCHER"/>

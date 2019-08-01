@@ -8,10 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.assignment.R
 import com.example.assignment.data.Api
 import com.example.assignment.data.ApiFactory
-import com.example.assignment.data.dto.Post
-import com.example.assignment.presentation.utils.SelectableItem
+import com.example.assignment.presentation.utils.toObservable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : Activity() {
@@ -25,10 +23,6 @@ class MainActivity : Activity() {
 		initApi()
 		initPostsList()
 		updateSelectedPostsCount()
-	}
-
-	override fun onStart() {
-		super.onStart()
 		loadPosts()
 	}
 
@@ -47,23 +41,14 @@ class MainActivity : Activity() {
 	}
 
 	private fun loadPosts() {
-		api.getPosts(POSTS_TAG, FIRST_PAGE)
-			.subscribeOn(Schedulers.io())
+		PostsDataSourceFactory(api)
+			.toObservable(PAGE_SIZE, PAGE_SIZE)
 			.observeOn(AndroidSchedulers.mainThread())
-			.subscribe({ response ->
-				val posts = convertPosts(response.hits)
-				postsAdapter.setItems(posts)
+			.subscribe({ pagedList ->
+				postsAdapter.submitList(pagedList)
 			}, { error ->
-				Log.e(LOG_TAG, "", error)
+				Log.e(POSTS_LOG_TAG, "", error)
 			})
-	}
-
-	private fun convertPosts(posts: List<Post>): List<SelectableItem<Post>> {
-	  return posts.map(this@MainActivity::convertPost)
-	}
-
-	private fun convertPost(post: Post): SelectableItem<Post> {
-	  return SelectableItem(post, false)
 	}
 
 	private fun updateSelectedPostsCount() {
@@ -78,8 +63,7 @@ class MainActivity : Activity() {
 	}
 
 	companion object {
-		private const val LOG_TAG = "posts"
-		private const val POSTS_TAG = "story"
-		private const val FIRST_PAGE = 1
+		const val POSTS_LOG_TAG = "posts"
+		private const val PAGE_SIZE = 20
 	}
 }

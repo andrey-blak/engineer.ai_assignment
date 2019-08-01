@@ -2,10 +2,10 @@ package com.example.assignment.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-class Post {
+data class Post(
 	@SerializedName("title")
-	val title: String? = null
+	val title: String? = null,
 
 	@SerializedName("created_at")
 	val createdAt: String? = null
-}
+)

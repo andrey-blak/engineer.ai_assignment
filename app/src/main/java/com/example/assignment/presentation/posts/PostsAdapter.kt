@@ -3,19 +3,17 @@ package com.example.assignment.presentation.posts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.paging.PagedList
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.assignment.R
 import com.example.assignment.data.dto.Post
 import com.example.assignment.presentation.utils.SelectableItem
 import kotlinx.android.synthetic.main.post_item.view.*
 
-class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
-	private val posts: MutableList<SelectableItem<Post>> = mutableListOf()
+class PostsAdapter : PagedListAdapter<SelectableItem<Post>, PostsAdapter.ViewHolder>(diffCallback) {
 	private var itemSelectionChangedListener: (() -> Unit)? = null
-
-	override fun getItemCount(): Int {
-		return posts.size
-	}
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 		val context = parent.context
@@ -26,14 +24,14 @@ class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 	}
 
 	override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-		val post = posts[position]
-		holder.bind(post)
+		val post = getItem(position)
+		if (post != null) {
+			holder.bind(post)
+		}
 	}
 
-	fun setItems(posts: List<SelectableItem<Post>>) {
-		this.posts.clear()
-		this.posts.addAll(posts)
-		notifyDataSetChanged()
+	override fun submitList(pagedList: PagedList<SelectableItem<Post>>?) {
+		super.submitList(pagedList)
 		notifyItemSelectionChangeListener()
 	}
 
@@ -42,13 +40,22 @@ class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 	}
 
 	fun getSelectedItemsCount(): Int {
-		return posts.count { item ->
-			item.isSelected
+		val currentList = currentList
+		return if (currentList != null) {
+			currentList.count { item ->
+				item.isSelected
+			}
+		} else {
+			0
 		}
 	}
 
 	private fun onItemSelectionChanged(position: Int, isChecked: Boolean) {
-		val post = posts[position]
+		val post = getItem(position)
+		if (post == null) {
+			return
+		}
+
 		post.isSelected = isChecked
 		notifyItemChanged(position)
 		notifyItemSelectionChangeListener()
@@ -73,6 +80,18 @@ class PostsAdapter : RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
 			itemView.post_title.text = post.title
 			itemView.post_created_at.text = post.createdAt
 			itemView.post_switch.setCheckedSilently(item.isSelected)
+		}
+	}
+
+	companion object {
+		private val diffCallback = object : DiffUtil.ItemCallback<SelectableItem<Post>>() {
+			override fun areItemsTheSame(oldItem: SelectableItem<Post>, newItem: SelectableItem<Post>): Boolean {
+				return oldItem === newItem
+			}
+
+			override fun areContentsTheSame(oldItem: SelectableItem<Post>, newItem: SelectableItem<Post>): Boolean {
+				return oldItem == newItem
+			}
 		}
 	}
 }

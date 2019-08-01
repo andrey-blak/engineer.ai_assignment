@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : Activity() {
 	private lateinit var api: Api
 	private lateinit var postsAdapter: PostsAdapter
+	private lateinit var postsDataSourceFactory: PostsDataSourceFactory
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -38,14 +39,20 @@ class MainActivity : Activity() {
 		postsAdapter.setOnItemSelectionChangedListener {
 			updateSelectedPostsCount()
 		}
+
+		main_swipe_refresh.setOnRefreshListener {
+			postsDataSourceFactory.getDataSource().value?.invalidate()
+		}
 	}
 
 	private fun loadPosts() {
-		PostsDataSourceFactory(api)
+		postsDataSourceFactory = PostsDataSourceFactory(api)
+		postsDataSourceFactory
 			.toObservable(PAGE_SIZE, PAGE_SIZE)
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribe({ pagedList ->
 				postsAdapter.submitList(pagedList)
+				main_swipe_refresh.isRefreshing = false
 			}, { error ->
 				Log.e(POSTS_LOG_TAG, "", error)
 			})

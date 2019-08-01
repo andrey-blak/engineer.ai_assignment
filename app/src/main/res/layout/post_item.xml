@@ -20,4 +20,9 @@
 		android:layout_height="wrap_content"
 		tools:text="2019-08-01T12:43:47.000Z"/>
 
+	<com.example.assignment.presentation.views.Switch
+		android:id="@+id/post_switch"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"/>
+
 </LinearLayout>

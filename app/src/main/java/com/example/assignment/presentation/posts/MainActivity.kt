@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.assignment.R
 import com.example.assignment.data.Api
 import com.example.assignment.data.ApiFactory
+import com.example.assignment.data.dto.Post
+import com.example.assignment.presentation.utils.SelectableItem
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -44,11 +46,19 @@ class MainActivity : Activity() {
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribe({ response ->
-				val posts = response.hits
+				val posts = convertPosts(response.hits)
 				postsAdapter.setItems(posts)
 			}, { error ->
 				Log.e(LOG_TAG, "", error)
 			})
+	}
+
+	private fun convertPosts(posts: List<Post>): List<SelectableItem<Post>> {
+	  return posts.map(this@MainActivity::convertPost)
+	}
+
+	private fun convertPost(post: Post): SelectableItem<Post> {
+	  return SelectableItem(post, false)
 	}
 
 	companion object {
